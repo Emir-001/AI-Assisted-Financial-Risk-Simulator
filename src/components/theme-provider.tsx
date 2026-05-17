@@ -1,0 +1,11 @@
+// ThemeProvider is a server component wrapper in @wrksz/themes
+
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "@wrksz/themes/next";
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
