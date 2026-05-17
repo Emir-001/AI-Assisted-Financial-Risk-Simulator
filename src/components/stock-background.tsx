@@ -100,6 +100,7 @@ export function StockBackground() {
 
     // Scrolling and animation states
     let scrollOffset = 0;
+    let gridScrollOffset = 0; // Independent continuous offset for the grid to prevent teleporting
     const scrollSpeed = 0.07; // Very slow and calm scrolling (yavaşça)
     let livePriceY = candles[candles.length - 1].close;
     let liveTargetY = livePriceY;
@@ -155,7 +156,8 @@ export function StockBackground() {
       ctx.strokeStyle = gridColor;
 
       // Vertical grid lines scrolling along with the ticker
-      const gridScroll = (scrollOffset * -1) % 45;
+      gridScrollOffset += scrollSpeed;
+      const gridScroll = (gridScrollOffset * -1) % 45;
       for (let x = gridScroll; x < width; x += 45) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
