@@ -494,131 +494,59 @@ export default function Dashboard() {
   })), [futureProjection, simulationResult]);
 
   const storyEvents = useMemo(() => {
-    const events = [];
-    let fundDepleted = false;
-    let debtSpike = false;
-    let recovery = false;
-    let inflationExposure = false;
+    // 1. Matematik motorumuzdan gelen gerçek simülasyon olaylarını al ve 'desc' formatına eşle
+    const events = futureProjection.events.map(ev => ({
+      month: ev.month,
+      type: ev.type,
+      title: ev.title,
+      desc: ev.description
+    }));
 
-    for (let i = 0; i < chartData.length; i++) {
-      const month = i + 1;
-      const current = chartData[i];
-      const prev = i > 0 ? chartData[i - 1] : null;
+    // 2. Eğer AI simülasyon sonucu varsa, Yapay Zekanın tespit ettiği ilk riski ve aksiyon önerisini yerleştir
+    if (simulationResult?.risks?.length) {
+      events.push({
+        month: 3,
+        type: 'warning',
+        title: 'AI Tespit Edilen Risk',
+        desc: simulationResult.risks[0]
+      });
+    }
+    if (simulationResult?.mitigation?.length) {
+      events.push({
+        month: 8,
+        type: 'info',
+        title: 'AI Aksiyon Önerisi',
+        desc: simulationResult.mitigation[0]
+      });
+    }
 
-      // Base events
-      if (current.bakiye < data.monthlyExpenses * 2 && !fundDepleted) {
-        events.push({
-          month,
-          type: 'critical',
-          title: 'Acil Durum Fonu Eridi',
-          desc: `Nakit tamponunuz (${formatNumber(Math.round(current.bakiye))} TL) 2 aylık giderinizin altına düştü. Ani ekonomik şoklara karşı savunmasızsınız.`
-        });
-        fundDepleted = true;
-      }
-      if (current.borc > current.bakiye * 1.5 && !debtSpike) {
-        events.push({
-          month,
-          type: 'warning',
-          title: 'Borç Yükü Zirvesi',
-          desc: `Toplam borcunuz (${formatNumber(Math.round(current.borc))} TL), nakit varlıklarınızı aştı. Finansal borçluluk stresiniz yükseliyor.`
-        });
-        debtSpike = true;
-      }
-      if ((data.inflationRate || 0) > 40 && month === 4 && !inflationExposure) {
-        events.push({
-          month,
-          type: 'warning',
-          title: 'Yüksek Enflasyon Baskısı',
-          desc: `Reel alım gücünüz %${data.inflationRate} yıllık enflasyon nedeniyle eriyor. Nakit varlıklarınızı mevduat faizinde nemalandırmak kritik önemde.`
-        });
-        inflationExposure = true;
-      }
-      if (prev && current.net > prev.net * 1.05 && current.net > 0 && !recovery) {
-        events.push({
-          month,
-          type: 'success',
-          title: 'Finansal Toparlanma',
-          desc: 'Net değerinizde istikrarlı bir büyüme ivmesi yakalandı. Nakit yönetiminiz başarıyla sonuç veriyor.'
-        });
-        recovery = true;
-      }
-
-      // Debt free milestone
-      if (current.borc === 0 && prev && prev.borc > 0) {
-        events.push({
-          month,
-          type: 'success',
-          title: 'Borçsuzluk Kilometre Taşı',
-          desc: 'Tebrikler! Toplam borcunuz tamamen sıfırlandı. Aylık borç ödemeleriniz doğrudan birikime yönlendirildi.'
-        });
-      }
-
-      // Salary raise milestone
-      if (month === 7) {
-        events.push({
-          month: 7,
-          type: 'info',
-          title: 'Enflasyonist Gelir Revizyonu',
-          desc: `6. ayı takiben, reel alım gücünüzü korumak adına aylık geliriniz enflasyona paralel olarak %${Math.round((data.inflationRate || 0) * 0.55)} oranında otomatik olarak güncellendi.`
-        });
-      }
-
-      // Yield interest milestone
-      if (month === 12 && current.bakiye > data.totalSavings) {
-        const yieldEarned = Math.round(
-          current.bakiye - data.totalSavings - (data.monthlyIncome - data.monthlyExpenses) * 12
-        );
-        if (yieldEarned > 1000) {
-          events.push({
-            month: 12,
-            type: 'success',
-            title: 'Mevduat Getiri Nemalandırması',
-            desc: `12 aylık birikimleriniz yüksek mevduat faiziyle nemalandırıldı. Net faiz kazancınız: ~${formatNumber(yieldEarned)} TL.`
-          });
-        }
-      }
-
-      // AI Risk and Mitigation integration into timeline
-      if (month === 3 && simulationResult?.risks?.length) {
-        events.push({
-          month: 3,
-          type: 'warning',
-          title: 'AI Tespit Edilen Risk',
-          desc: simulationResult.risks[0]
-        });
-      }
-      if (month === 8 && simulationResult?.mitigation?.length) {
-        events.push({
-          month: 8,
-          type: 'info',
-          title: 'AI Aksiyon Önerisi',
-          desc: simulationResult.mitigation[0]
-        });
-      }
-
-      // Active scenario comparison
-      if (month === 12 && current.senaryo !== null) {
+    // 3. Eğer aktif bir senaryo (turuncu kesik çizgi) varsa, 12. ayda baz durumla farkını karşılaştır
+    if (simulationResult?.projection?.length) {
+      const lastMonthIdx = chartData.length - 1;
+      const current = chartData[lastMonthIdx];
+      if (current && current.senaryo !== null) {
         const diff = current.senaryo - current.net;
         if (diff > 0) {
           events.push({
             month: 12,
             type: 'success',
             title: `Senaryo Etkisi: ${simulationResult.type}`,
-            desc: `Simüle edilen karar sonucunda net değeriniz baz senaryoya göre ${formatNumber(Math.round(diff))} TL artış gösterdi. Finansal gücünüzü yükselten bir karar.`
+            desc: `Simüle edilen karar sonucunda 12. ayın sonunda net değeriniz baz senaryoya göre ${formatNumber(Math.round(diff))} TL artış gösterdi. Finansal gücünüzü artıran bir hamle.`
           });
         } else if (diff < 0) {
           events.push({
             month: 12,
             type: 'critical',
             title: `Senaryo Riski: ${simulationResult.type}`,
-            desc: `Simüle edilen karar neticesinde net değeriniz baz senaryoya kıyasla ${formatNumber(Math.round(Math.abs(diff)))} TL azaldı. Nakit akışınızı korumak için ek önlemler almanız gerekebilir.`
+            desc: `Simüle edilen karar sonucunda 12. ayın sonunda net değeriniz baz senaryoya kıyasla ${formatNumber(Math.round(Math.abs(diff)))} TL azaldı. Nakit dengenizi korumak için önlem almalısınız.`
           });
         }
       }
     }
 
+    // Aylara göre sırala
     return events.sort((a, b) => a.month - b.month);
-  }, [chartData, data, metrics, simulationResult]);
+  }, [futureProjection, simulationResult, chartData]);
 
   const pieData = useMemo(() => [
     { name: 'Kira/Ev', value: data.expenseCategories?.housing || 0, color: '#3b82f6' },
