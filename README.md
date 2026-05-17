@@ -1,3 +1,5 @@
+# Bu web uygulamam şuanlık bilgisayar için geliştirilmiş olup ileride mobil versiyonları için iyileştirmeler yapılacaktır
+
 # 🚀 AI-Assisted Financial Risk Simulator
 ### (Yapay Zeka Destekli Çoklu Ajan Finansal Risk Simülatörü)
 
