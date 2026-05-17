@@ -432,10 +432,6 @@ export default function Dashboard() {
   }, [multiAgentReport]);
 
   const exportPDF = async () => {
-    if (multiAgentReport) {
-      await handleDownloadPDF();
-      return;
-    }
     try {
       const { jsPDF } = await import("jspdf");
       const htmlToImage = await import("html-to-image");
