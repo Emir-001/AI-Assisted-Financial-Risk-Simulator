@@ -8,9 +8,6 @@ interface Candle {
   close: number;
   high: number;
   low: number;
-  label?: string;
-  isYearTransition?: boolean;
-  yearText?: string;
 }
 
 interface TrendLine {
@@ -22,7 +19,7 @@ interface TrendLine {
   isDashed: boolean;
 }
 
-const MONTHS = ["Oca", "Kas", "Ara", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki"];
+
 
 export function StockBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -63,11 +60,11 @@ export function StockBackground() {
     const maxCandles = Math.ceil(width / step) + 5;
     const candles: Candle[] = [];
     let currentVal = height * 0.45;
-    let monthCounter = 0;
+    let globalCandleIndex = 0;
 
-    const generateCandle = (prevVal: number, index: number): Candle => {
-      // Create some macro waves
-      const wave = Math.sin(index * 0.08) * 35 + Math.cos(index * 0.04) * 20;
+    const generateCandle = (prevVal: number): Candle => {
+      // Create some macro waves using global index to prevent sudden jumping/teleporting
+      const wave = Math.sin(globalCandleIndex * 0.08) * 35 + Math.cos(globalCandleIndex * 0.04) * 20;
       const trend = -0.15; // slight upward drift (downward Y)
       const change = (Math.random() * 22 - 11) + trend + wave * 0.05;
 
@@ -80,25 +77,14 @@ export function StockBackground() {
       const high = Math.max(height * 0.15, bodyMin - Math.random() * 12);
       const low = Math.min(height * 0.85, bodyMax + Math.random() * 12);
 
-      const candle: Candle = { open, close, high, low };
-
-      // Set bottom axis timeline labels periodically
-      if (index % 16 === 0) {
-        candle.label = MONTHS[monthCounter % 12];
-        if (monthCounter % 12 === 2) { // Ara/2026 transition
-          candle.isYearTransition = true;
-          candle.yearText = String(2025 + Math.floor(monthCounter / 12));
-        }
-        monthCounter++;
-      }
-
-      return candle;
+      globalCandleIndex++;
+      return { open, close, high, low };
     };
 
     // Populate initial candles
     for (let i = 0; i < maxCandles; i++) {
       const prev = candles.length > 0 ? candles[candles.length - 1].close : currentVal;
-      candles.push(generateCandle(prev, i));
+      candles.push(generateCandle(prev));
     }
 
     // Scrolling and animation states
@@ -177,12 +163,12 @@ export function StockBackground() {
       // --- 3. Scroll Update Logic ---
       scrollOffset += scrollSpeed;
       if (scrollOffset >= step) {
-        scrollOffset = 0;
+        scrollOffset -= step; // Maintain remainder for pixel-perfect smoothness
 
         // Remove oldest candle on left, push new candle on right
         candles.shift();
         const lastCandleVal = candles[candles.length - 1].close;
-        candles.push(generateCandle(lastCandleVal, monthCounter * 16));
+        candles.push(generateCandle(lastCandleVal));
 
         // Adjust trend lines indexes due to shift
         trendLines.forEach(line => {
@@ -320,27 +306,6 @@ export function StockBackground() {
             sum += (candles[i - k].open + candles[i - k].close) / 2;
           }
           maPoints.push({ x: x + candleWidth / 2, y: sum / maPeriod });
-        }
-
-        // Draw Date Axis Labels (bottom of the canvas)
-        if (candle.label) {
-          ctx.strokeStyle = axisColor;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x + candleWidth / 2, height - 32);
-          ctx.lineTo(x + candleWidth / 2, height - 26);
-          ctx.stroke();
-
-          ctx.fillStyle = textColor;
-          ctx.font = "9px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(candle.label, x + candleWidth / 2, height - 16);
-
-          if (candle.isYearTransition && candle.yearText) {
-            ctx.font = "bold 9px sans-serif";
-            ctx.fillStyle = isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.35)";
-            ctx.fillText(candle.yearText, x + candleWidth / 2, height - 4);
-          }
         }
       }
 
