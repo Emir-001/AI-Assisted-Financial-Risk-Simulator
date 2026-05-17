@@ -168,16 +168,42 @@ export function calculateFutureProjection(data: FinancialData): FutureProjection
   
   // Aylık enflasyon tahmini
   const monthlyInflation = (inflationRate / 100) / 12;
+  
+  // Mevduat faizi tahmini (Enflasyonun biraz altında bir ortalama getiri varsayımı)
+  const annualDepositRate = Math.max(0, inflationRate - 10);
+  const monthlyDepositYield = (annualDepositRate / 100) / 12;
 
   let zeroSavingsTriggered = false;
   let zeroDebtTriggered = false;
+  let salaryAdjusted = false;
+
+  let currentIncome = monthlyIncome;
 
   for (let month = 1; month <= 12; month++) {
+    // 6. Ayın sonunda (7. Ayda) Maaş Zammı (6 aylık birikimli enflasyon kadar zam)
+    if (month === 7 && !salaryAdjusted) {
+       const sixMonthInflation = Math.pow(1 + monthlyInflation, 6) - 1;
+       currentIncome = currentIncome * (1 + sixMonthInflation);
+       salaryAdjusted = true;
+       events.push({ 
+         month, 
+         type: 'info', 
+         title: 'Maaş Zammı (Enflasyon Farkı)', 
+         description: `6 aylık birikmiş enflasyon (%${(sixMonthInflation*100).toFixed(1)}) oranında gelirinize zam yansıtıldı.` 
+       });
+    }
+
+    // Birikimlerin faiz getirisi (Ay başı bakiyesi üzerinden)
+    if (currentSavings > 0) {
+       const interestEarned = currentSavings * monthlyDepositYield;
+       currentSavings += interestEarned;
+    }
+
     // Giderler enflasyon oranında artar
     const inflatedExpenses = monthlyExpenses * Math.pow(1 + monthlyInflation, month);
     
     // Aylık net nakit akışı
-    const netCashFlow = monthlyIncome - inflatedExpenses - monthlyDebtPayment;
+    const netCashFlow = currentIncome - inflatedExpenses - monthlyDebtPayment;
     
     currentSavings += netCashFlow;
     
@@ -200,12 +226,12 @@ export function calculateFutureProjection(data: FinancialData): FutureProjection
     });
 
     // Olay (Milestone) Tespiti
-    if (month === 3 && netCashFlow < 0 && totalSavings > 0) {
-       events.push({ month, type: 'warning', title: 'Nakit Erimesi', description: `Enflasyon nedeniyle 3. ayda aylık net akışınız eksiye düşüyor.` });
+    if (month === 3 && netCashFlow < 0 && currentSavings > 0) {
+       events.push({ month, type: 'warning', title: 'Nakit Akışı Negatif', description: `Gider artışları sebebiyle 3. ayda aylık net akışınız eksiye düşüyor. Birikimden yemeye başladınız.` });
     }
     
     if (currentSavings === 0 && !zeroSavingsTriggered) {
-      events.push({ month, type: 'critical', title: 'Nakit Rezervleri Tükendi', description: `${month}. ayda likit birikimleriniz sıfırlanıyor ve mecburi borçlanma başlıyor.` });
+      events.push({ month, type: 'critical', title: 'Nakit Rezervleri Tükendi', description: `${month}. ayda likit birikimleriniz sıfırlanıyor ve zorunlu borçlanma sarmalı başlıyor.` });
       zeroSavingsTriggered = true;
     }
 
@@ -215,9 +241,9 @@ export function calculateFutureProjection(data: FinancialData): FutureProjection
     }
   }
 
-  // 12 aylık süreçte hiç uyarı yoksa
-  if (events.length === 0 || events.every(e => e.type === 'success')) {
-     events.push({ month: 12, type: 'success', title: 'İstikrarlı Büyüme', description: 'Önümüzdeki 1 yıl boyunca finansal sağlığınız risk altında olmadan istikrarlı bir şekilde büyüyor.' });
+  // 12 aylık süreçte hiç kritik uyarı yoksa
+  if (!events.some(e => e.type === 'critical')) {
+     events.push({ month: 12, type: 'success', title: 'Dirençli Büyüme', description: '1 yıl boyunca maaş zamları ve mevduat getirileri sayesinde enflasyona yenilmeden büyümeyi başardınız.' });
   }
 
   return { data: projectionData, events };
