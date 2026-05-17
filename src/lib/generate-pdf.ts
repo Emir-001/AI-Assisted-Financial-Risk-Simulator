@@ -57,7 +57,7 @@ export async function generatePDFReport(
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(148, 163, 184);
-  doc.text("Multi-Agent AI Finansal Simülasyon Motoru", margin + 16, 29);
+  doc.text("Çoklu Ajan AI Finansal Simülasyon Motoru", margin + 16, 29);
 
   // Score badge
   const [sr, sg, sb] = scoreColor(report.supervisor.overallScore);

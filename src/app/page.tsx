@@ -364,7 +364,7 @@ export default function Dashboard() {
       // If supervisor has projection data, also update simulationResult for chart
       if (report.supervisor.projection?.length) {
         setSimulationResult({
-          type: "multi-agent",
+          type: "Çoklu Ajan",
           impact: report.supervisor.verdict,
           projection: report.supervisor.projection,
         });
@@ -398,22 +398,22 @@ export default function Dashboard() {
       const htmlToImage = await import("html-to-image");
       const element = document.getElementById("ai-report-content");
       if (!element) return;
-      
+
       const isDark = document.documentElement.classList.contains("dark");
       const bgColor = isDark ? "#020817" : "#ffffff";
-      
+
       // Mobilde taşma/daralma olmaması için sabit min-width verebiliriz (isteğe bağlı)
       const imgData = await htmlToImage.toPng(element, {
         pixelRatio: 2,
         backgroundColor: bgColor,
         style: { background: bgColor, width: element.scrollWidth + 'px' }
       });
-      
+
       const dummyPdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = dummyPdf.internal.pageSize.getWidth();
       const imgProps = dummyPdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
+
       // Tek, tam boyutta bir sayfa oluşturarak alttaki beyaz boşluğu yok ediyoruz
       const pdf = new jsPDF({
         orientation: "p",
@@ -448,7 +448,7 @@ export default function Dashboard() {
       const pdfWidth = dummyPdf.internal.pageSize.getWidth();
       const imgProps = dummyPdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
+
       // Tek, kesintisiz PDF sayfası oluştur
       const pdf = new jsPDF({
         orientation: "p",
@@ -734,7 +734,7 @@ export default function Dashboard() {
                   {aiProcessingStep === 5 && "Yapılandırılmış rapor oluşturuluyor..."}
                   <span className="animate-pulse ml-1">_</span>
                 </p>
-                <p className="text-sm text-slate-400 font-mono">Multi-Agent Risk Engine v2.0 • TCMB & World Bank verileri yükleniyor...</p>
+                <p className="text-sm text-slate-400 font-mono">Çoklu Ajan Risk Motoru v2.0 • TCMB & World Bank verileri yükleniyor...</p>
               </CardContent>
             </Card>
           ) : multiAgentReport ? (
@@ -881,10 +881,10 @@ export default function Dashboard() {
                   <Slider value={[data.riskTolerance || 0]} onValueChange={val => setData({ ...data, riskTolerance: val[0] })} max={100} step={1} />
                 </div>
 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={setStandardMacroValues} 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={setStandardMacroValues}
                   className="w-full mt-2 text-[11px] font-bold gap-1.5 border-dashed border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 >
                   <RefreshCcw className="w-3.5 h-3.5 animate-spin-hover" />
@@ -1076,7 +1076,7 @@ export default function Dashboard() {
 
         {/* Scenario Comparison Matrix */}
         <div className="space-y-4 pt-4">
-          <div 
+          <div
             className="flex items-center justify-between cursor-pointer group"
             onClick={() => setShowAdvancedStressTest(!showAdvancedStressTest)}
           >
@@ -1091,52 +1091,52 @@ export default function Dashboard() {
           </div>
           {showAdvancedStressTest && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 fade-in duration-300">
-            <Card className="bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">Mevcut Durum</CardTitle>
-                <p className="text-lg font-bold text-slate-800 dark:text-slate-200">Baz Senaryo</p>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1"><span>Enflasyon</span><span className="font-medium">%{data.inflationRate || 0}</span></div>
-                <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1"><span>Risk Skoru</span><span className="font-medium text-amber-500">{metrics.riskScore}</span></div>
-                <div className="flex justify-between"><span>Aylık Bakiye</span><span className="font-medium text-emerald-500">+{formatNumber(data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment)} TL</span></div>
-              </CardContent>
-            </Card>
+              <Card className="bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-slate-500">Mevcut Durum</CardTitle>
+                  <p className="text-lg font-bold text-slate-800 dark:text-slate-200">Baz Senaryo</p>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1"><span>Enflasyon</span><span className="font-medium">%{data.inflationRate || 0}</span></div>
+                  <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-1"><span>Risk Skoru</span><span className="font-medium text-amber-500">{metrics.riskScore}</span></div>
+                  <div className="flex justify-between"><span>Aylık Bakiye</span><span className="font-medium text-emerald-500">+{formatNumber(data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment)} TL</span></div>
+                </CardContent>
+              </Card>
 
-            <Card className="bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-red-500">Şok Senaryosu</CardTitle>
-                <p className="text-lg font-bold text-red-800 dark:text-red-400">Hiperenflasyon</p>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                <div className="flex justify-between border-b border-red-200/50 dark:border-red-900/50 pb-1"><span>Enflasyon</span><span className="font-medium text-red-500">%120</span></div>
-                <div className="flex justify-between border-b border-red-200/50 dark:border-red-900/50 pb-1"><span>Risk Skoru</span><span className="font-medium text-red-500">{Math.min(100, metrics.riskScore + 35)}</span></div>
-                <div className="flex justify-between"><span>Reel Alım Gücü</span><span className="font-medium text-red-500">-%30</span></div>
-              </CardContent>
-            </Card>
+              <Card className="bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-red-500">Şok Senaryosu</CardTitle>
+                  <p className="text-lg font-bold text-red-800 dark:text-red-400">Hiperenflasyon</p>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex justify-between border-b border-red-200/50 dark:border-red-900/50 pb-1"><span>Enflasyon</span><span className="font-medium text-red-500">%120</span></div>
+                  <div className="flex justify-between border-b border-red-200/50 dark:border-red-900/50 pb-1"><span>Risk Skoru</span><span className="font-medium text-red-500">{Math.min(100, metrics.riskScore + 35)}</span></div>
+                  <div className="flex justify-between"><span>Reel Alım Gücü</span><span className="font-medium text-red-500">-%30</span></div>
+                </CardContent>
+              </Card>
 
-            <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-blue-500">Stres Senaryosu</CardTitle>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <p className="text-lg font-bold text-blue-800 dark:text-blue-400">Resesyon</p>
-                  <div className="group relative inline-block">
-                    <div className="cursor-help flex items-center justify-center">
-                      <Info className="w-3.5 h-3.5 text-blue-400 hover:text-blue-500 transition-colors" />
-                    </div>
-                    <div className="absolute left-0 top-5 w-64 p-3 bg-slate-800 text-white text-xs font-normal rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 normal-case leading-relaxed">
-                      Ekonomik faaliyetlerin geçici olarak daralması, üretimin azalması ve işsizliğin artması durumudur. Simülasyonda gelirlerinizin %20 azaldığı ve nakit akışınızın baskılandığı bir stres testi uygulanır.
+              <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-blue-500">Stres Senaryosu</CardTitle>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <p className="text-lg font-bold text-blue-800 dark:text-blue-400">Resesyon</p>
+                    <div className="group relative inline-block">
+                      <div className="cursor-help flex items-center justify-center">
+                        <Info className="w-3.5 h-3.5 text-blue-400 hover:text-blue-500 transition-colors" />
+                      </div>
+                      <div className="absolute left-0 top-5 w-64 p-3 bg-slate-800 text-white text-xs font-normal rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 normal-case leading-relaxed">
+                        Ekonomik faaliyetlerin geçici olarak daralması, üretimin azalması ve işsizliğin artması durumudur. Simülasyonda gelirlerinizin %20 azaldığı ve nakit akışınızın baskılandığı bir stres testi uygulanır.
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                <div className="flex justify-between border-b border-blue-200/50 dark:border-blue-900/50 pb-1"><span>Gelir Kaybı</span><span className="font-medium text-blue-500">-%20</span></div>
-                <div className="flex justify-between border-b border-blue-200/50 dark:border-blue-900/50 pb-1"><span>Risk Skoru</span><span className="font-medium text-blue-500">{Math.min(100, metrics.riskScore + 25)}</span></div>
-                <div className="flex justify-between"><span>Nakit Ömrü</span><span className="font-medium text-blue-500">{Math.max(0, metrics.emergencyFundMonths - 2).toFixed(1)} Ay</span></div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex justify-between border-b border-blue-200/50 dark:border-blue-900/50 pb-1"><span>Gelir Kaybı</span><span className="font-medium text-blue-500">-%20</span></div>
+                  <div className="flex justify-between border-b border-blue-200/50 dark:border-blue-900/50 pb-1"><span>Risk Skoru</span><span className="font-medium text-blue-500">{Math.min(100, metrics.riskScore + 25)}</span></div>
+                  <div className="flex justify-between"><span>Nakit Ömrü</span><span className="font-medium text-blue-500">{Math.max(0, metrics.emergencyFundMonths - 2).toFixed(1)} Ay</span></div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
 
