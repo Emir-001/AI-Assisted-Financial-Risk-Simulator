@@ -14,6 +14,7 @@ interface AIReportPanelProps {
   report: MultiAgentReport;
   onDownloadPDF: () => void;
   isPdfLoading: boolean;
+  isExporting?: boolean;
 }
 
 const severityColor = (s: string) => {
@@ -38,7 +39,7 @@ const GeminiLogo = ({ className }: { className?: string }) => (
   <img src="/Google-Gemini-Logo-Transparent.png" alt="Gemini" className={cn("object-contain", className)} />
 );
 
-export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportPanelProps) {
+export function AIReportPanel({ report, onDownloadPDF, isPdfLoading, isExporting }: AIReportPanelProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "macro" | "credit" | "sector">("overview");
 
   const tabs = [
@@ -49,7 +50,7 @@ export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportP
   ];
 
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div id="ai-report-content" className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500", isExporting && "bg-white dark:bg-[#020817] p-8")}>
       {/* Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -64,57 +65,61 @@ export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportP
             <p className="font-bold text-slate-900 dark:text-white max-w-xs text-sm leading-snug">{report.supervisor.verdict}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
-          {/* Live data sources */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {report.ragSources?.map((src, i) => (
-              <Badge key={i} variant="outline" className="gap-1 text-[10px] border-blue-200 text-blue-600 dark:text-blue-400 dark:border-blue-800">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                {src}
-              </Badge>
-            ))}
+        {!isExporting && (
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {report.ragSources?.map((src, i) => (
+                <Badge key={i} variant="outline" className="gap-1 text-[10px] border-blue-200 text-blue-600 dark:text-blue-400 dark:border-blue-800">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  {src}
+                </Badge>
+              ))}
+            </div>
+            <Badge variant="outline" className="gap-1 text-xs border-emerald-300 text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="w-3 h-3" /> %{report.confidenceScore} Güven
+            </Badge>
+            <Button
+              size="sm"
+              onClick={onDownloadPDF}
+              disabled={isPdfLoading}
+              className="gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-white text-xs"
+            >
+              {isPdfLoading ? (
+                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-3 h-3" />
+              )}
+              Raporu İndir
+            </Button>
           </div>
-          <Badge variant="outline" className="gap-1 text-xs border-emerald-300 text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck className="w-3 h-3" /> %{report.confidenceScore} Güven
-          </Badge>
-          <Button
-            size="sm"
-            onClick={onDownloadPDF}
-            disabled={isPdfLoading}
-            className="gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-white text-xs"
-          >
-            {isPdfLoading ? (
-              <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Download className="w-3 h-3" />
-            )}
-            Raporu İndir
-          </Button>
-        </div>
+        )}
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200",
-              activeTab === tab.id
-                ? "bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white"
-                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-            )}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {!isExporting && (
+        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200",
+                activeTab === tab.id
+                  ? "bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── OVERVIEW TAB ── */}
-      {activeTab === "overview" && (
+      {(isExporting || activeTab === "overview") && (
         <div className="space-y-4">
+          {isExporting && <h3 className="font-bold text-lg border-b pb-2 mt-6">Genel Bakış & Öneriler</h3>}
           {/* Supervisor Summary */}
           <Card className="border-slate-200 dark:border-slate-800">
             <CardContent className="pt-4">
@@ -193,8 +198,9 @@ export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportP
       )}
 
       {/* ── MACRO TAB ── */}
-      {activeTab === "macro" && (
+      {(isExporting || activeTab === "macro") && (
         <div className="space-y-4">
+          {isExporting && <h3 className="font-bold text-lg border-b pb-2 mt-6">Makroekonomik Analiz</h3>}
           <Card className="border-slate-200 dark:border-slate-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -243,8 +249,9 @@ export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportP
       )}
 
       {/* ── CREDIT TAB ── */}
-      {activeTab === "credit" && (
+      {(isExporting || activeTab === "credit") && (
         <div className="space-y-4">
+          {isExporting && <h3 className="font-bold text-lg border-b pb-2 mt-6">Kredi & Borç Risk Analizi</h3>}
           <Card className="border-slate-200 dark:border-slate-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -295,8 +302,9 @@ export function AIReportPanel({ report, onDownloadPDF, isPdfLoading }: AIReportP
       )}
 
       {/* ── SECTOR TAB ── */}
-      {activeTab === "sector" && (
+      {(isExporting || activeTab === "sector") && (
         <div className="space-y-4">
+          {isExporting && <h3 className="font-bold text-lg border-b pb-2 mt-6">Sektörel Risk Analizi</h3>}
           <Card className="border-slate-200 dark:border-slate-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">

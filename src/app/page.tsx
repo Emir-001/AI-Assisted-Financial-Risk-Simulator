@@ -96,6 +96,7 @@ export default function Dashboard() {
 
   // PDF States
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [isExportingReport, setIsExportingReport] = useState(false);
 
   // Dinamik Senaryo State'leri
   const [carPrice, setCarPrice] = useState(500000);
@@ -388,15 +389,53 @@ export default function Dashboard() {
   const handleDownloadPDF = useCallback(async () => {
     if (!multiAgentReport) return;
     setIsPdfLoading(true);
+    setIsExportingReport(true);
     try {
-      const { generatePDFReport } = await import("@/lib/generate-pdf");
-      await generatePDFReport(multiAgentReport, data, metrics);
+      // Bekleme: React'in isExportingReport state'ini DOM'a yansıtması için
+      await new Promise(r => setTimeout(r, 200));
+
+      const { jsPDF } = await import("jspdf");
+      const htmlToImage = await import("html-to-image");
+      const element = document.getElementById("ai-report-content");
+      if (!element) return;
+      
+      const isDark = document.documentElement.classList.contains("dark");
+      const bgColor = isDark ? "#020817" : "#ffffff";
+      
+      // Mobilde taşma/daralma olmaması için sabit min-width verebiliriz (isteğe bağlı)
+      const imgData = await htmlToImage.toPng(element, {
+        pixelRatio: 2,
+        backgroundColor: bgColor,
+        style: { background: bgColor, width: element.scrollWidth + 'px' }
+      });
+      
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save(`Finansal_Risk_Raporu_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e) {
       console.error("PDF oluşturma hatası:", e);
     } finally {
+      setIsExportingReport(false);
       setIsPdfLoading(false);
     }
-  }, [multiAgentReport, data, metrics]);
+  }, [multiAgentReport]);
 
   const exportPDF = async () => {
     if (multiAgentReport) {
@@ -417,10 +456,24 @@ export default function Dashboard() {
       });
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgProps = pdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("Finansal_Rapor.pdf");
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save("Finansal_Analiz.pdf");
     } catch (e) {
       console.error("PDF oluşturma hatası:", e);
     }
@@ -692,6 +745,7 @@ export default function Dashboard() {
               report={multiAgentReport}
               onDownloadPDF={handleDownloadPDF}
               isPdfLoading={isPdfLoading}
+              isExporting={isExportingReport}
             />
           ) : (
             <Card className="bg-slate-50 dark:bg-slate-900/30 border-dashed border-2 border-slate-200 dark:border-slate-800">
