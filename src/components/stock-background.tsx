@@ -62,8 +62,19 @@ export function StockBackground() {
     let currentVal = height * 0.45;
     let globalCandleIndex = 0;
 
-    const generateCandle = (prevVal: number): Candle => {
-      // Create some macro waves using global index to prevent sudden jumping/teleporting
+    const generateCandle = (prevVal: number, isLive = false): Candle => {
+      if (isLive) {
+        globalCandleIndex++;
+        // Live candle starts completely flat, just like a real stock market candle
+        return {
+          open: prevVal,
+          close: prevVal,
+          high: prevVal - 2,
+          low: prevVal + 2
+        };
+      }
+
+      // Historically generated candle (for initial population)
       const wave = Math.sin(globalCandleIndex * 0.08) * 35 + Math.cos(globalCandleIndex * 0.04) * 20;
       const trend = -0.15; // slight upward drift (downward Y)
       const change = (Math.random() * 22 - 11) + trend + wave * 0.05;
@@ -168,7 +179,7 @@ export function StockBackground() {
         // Remove oldest candle on left, push new candle on right
         candles.shift();
         const lastCandleVal = candles[candles.length - 1].close;
-        candles.push(generateCandle(lastCandleVal));
+        candles.push(generateCandle(lastCandleVal, true)); // Push as LIVE candle
 
         // Adjust trend lines indexes due to shift
         trendLines.forEach(line => {
@@ -185,18 +196,19 @@ export function StockBackground() {
         }
       }
 
-      // Live price fluctuation tracker
+      // Live price fluctuation tracker (Independent of candle array to prevent single-frame jumps)
       liveFluctuationTime += 0.03;
       if (Math.random() < 0.05) {
-        liveTargetY = candles[candles.length - 1].close + (Math.random() * 10 - 5);
+        const drift = -0.05; // slight upward drift
+        liveTargetY = Math.max(height * 0.22, Math.min(height * 0.75, livePriceY + (Math.random() * 16 - 8) + drift));
       }
       livePriceY += (liveTargetY - livePriceY) * 0.05;
       candles[candles.length - 1].close = livePriceY;
 
-      // Ensure Y limits for high/low of live candle
+      // Ensure Y limits for high/low of live candle expand dynamically
       const liveCandle = candles[candles.length - 1];
-      liveCandle.high = Math.min(liveCandle.high, livePriceY - 3);
-      liveCandle.low = Math.max(liveCandle.low, livePriceY + 3);
+      liveCandle.high = Math.min(liveCandle.high, livePriceY - 2);
+      liveCandle.low = Math.max(liveCandle.low, livePriceY + 2);
 
       // --- 4. Draw Trend Lines ---
       trendLines.forEach(line => {
