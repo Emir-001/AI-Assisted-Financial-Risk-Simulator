@@ -89,6 +89,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scenarioMode, setScenarioMode] = useState(false);
+  const [showAdvancedStressTest, setShowAdvancedStressTest] = useState(false);
 
   const [liveInsight, setLiveInsight] = useState<string>("Finansal verileriniz analiz ediliyor...");
   const [isInsightLoading, setIsInsightLoading] = useState(false);
@@ -1024,11 +1025,21 @@ export default function Dashboard() {
 
         {/* Scenario Comparison Matrix */}
         <div className="space-y-4 pt-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Zap className="w-6 h-6 text-amber-500" />
-            Makro Senaryo Şok Testi
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div 
+            className="flex items-center justify-between cursor-pointer group"
+            onClick={() => setShowAdvancedStressTest(!showAdvancedStressTest)}
+          >
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Zap className="w-6 h-6 text-amber-500" />
+              Makro Senaryo Şok Testi
+              <Badge variant="outline" className="text-[10px] font-normal ml-2 border-amber-200 text-amber-600 dark:border-amber-900/50 dark:text-amber-500">Gelişmiş Analiz</Badge>
+            </h2>
+            <Button variant="ghost" size="sm" className="p-0 h-8 w-8 text-slate-400 group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors pointer-events-none">
+              {showAdvancedStressTest ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </Button>
+          </div>
+          {showAdvancedStressTest && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 fade-in duration-300">
             <Card className="bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-slate-500">Mevcut Durum</CardTitle>
@@ -1075,6 +1086,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+          )}
         </div>
 
         {/* Simülasyon Motoru + Grafikler */}

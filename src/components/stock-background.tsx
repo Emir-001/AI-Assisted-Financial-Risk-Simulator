@@ -70,11 +70,11 @@ export function StockBackground() {
       const wave = Math.sin(index * 0.08) * 35 + Math.cos(index * 0.04) * 20;
       const trend = -0.15; // slight upward drift (downward Y)
       const change = (Math.random() * 22 - 11) + trend + wave * 0.05;
-      
+
       const open = prevVal;
       // Keep within bounds
       const close = Math.max(height * 0.2, Math.min(height * 0.78, open - change));
-      
+
       const bodyMin = Math.min(open, close);
       const bodyMax = Math.max(open, close);
       const high = Math.max(height * 0.15, bodyMin - Math.random() * 12);
@@ -137,27 +137,21 @@ export function StockBackground() {
       ctx.clearRect(0, 0, width, height);
 
       const isDark = theme === "dark";
-      
+
       // Dynamic Styling Palette (Muted background opacities)
       const gridColor = isDark ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.015)";
       const axisColor = isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)";
       const textColor = isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.25)";
-      
+
       const greenBody = isDark ? "rgba(16, 185, 129, 0.16)" : "rgba(16, 185, 129, 0.08)";
       const greenWick = isDark ? "rgba(16, 185, 129, 0.35)" : "rgba(16, 185, 129, 0.2)";
-      
+
       const redBody = isDark ? "rgba(239, 68, 68, 0.16)" : "rgba(239, 68, 68, 0.08)";
       const redWick = isDark ? "rgba(239, 68, 68, 0.35)" : "rgba(239, 68, 68, 0.2)";
-      
+
       const MAColor = isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.08)"; // Orange Moving Average
       const waterColor = isDark ? "rgba(255, 255, 255, 0.01)" : "rgba(0, 0, 0, 0.007)";
 
-      // --- 1. Watermark ---
-      ctx.font = "bold 6vw sans-serif";
-      ctx.fillStyle = waterColor;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("AI RISK ENGINE", width * 0.5, height * 0.45);
 
       // --- 2. Grid lines ---
       ctx.lineWidth = 1;
@@ -184,7 +178,7 @@ export function StockBackground() {
       scrollOffset += scrollSpeed;
       if (scrollOffset >= step) {
         scrollOffset = 0;
-        
+
         // Remove oldest candle on left, push new candle on right
         candles.shift();
         const lastCandleVal = candles[candles.length - 1].close;
@@ -248,7 +242,7 @@ export function StockBackground() {
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 5]);
       ctx.strokeStyle = isDark ? "rgba(59, 130, 246, 0.22)" : "rgba(37, 99, 235, 0.12)";
-      
+
       // Support line
       ctx.beginPath();
       ctx.moveTo(0, supportY);
@@ -264,7 +258,7 @@ export function StockBackground() {
 
       // Support & Resistance Price tags (on right axis)
       ctx.font = "bold 9px monospace";
-      
+
       // Resistance tag (59.80 in dark/black box)
       ctx.fillStyle = isDark ? "#1e293b" : "#f1f5f9";
       ctx.strokeStyle = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -369,7 +363,7 @@ export function StockBackground() {
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 3]);
       ctx.strokeStyle = isDark ? "rgba(16, 185, 129, 0.25)" : "rgba(16, 185, 129, 0.18)";
-      
+
       // Tracker line extending to right edge
       ctx.beginPath();
       ctx.moveTo(rightX, livePriceY);
@@ -401,7 +395,7 @@ export function StockBackground() {
       ctx.font = "bold 9px monospace";
       ctx.fillStyle = isDark ? "#34d399" : "#065f46";
       ctx.textAlign = "center";
-      
+
       // Calculate realistic active index price text (e.g. 40.76)
       const currentLivePrice = ((height - livePriceY) * 0.12 + 25.4).toFixed(2);
       ctx.fillText(currentLivePrice, width - 30, livePriceY + 3);
