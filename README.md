@@ -1,72 +1,96 @@
-# AI-Assisted Financial Risk Simulator
-(Yapay Zeka Destekli Finansal Risk Simülatörü)
+# 🚀 AI-Assisted Financial Risk Simulator
+### (Yapay Zeka Destekli Çoklu Ajan Finansal Risk Simülatörü)
 
-Yapay Zeka Destekli Finansal Risk Simülatörü, kullanıcıların kredi (konut, araç vb.) ve diğer finansal kararlarını almadan önce olası senaryoları analiz etmelerini sağlayan modern bir web uygulamasıdır. Google Gemini AI entegrasyonu ile kullanıcıların girdiği finansal verilere dayanarak gerçek zamanlı risk analizi, nakit akışı projeksiyonları ve risk azaltma stratejileri sunar.
+Yapay Zeka Destekli Finansal Risk Simülatörü; kullanıcıların bireysel finansal verilerini, borç yapılarını ve birikim hedeflerini derinlemesine analiz eden, **canlı ekonomik verilere (RAG)** dayanan ve **çoklu-ajan (Multi-Agent) mimarisi** kullanan yeni nesil bir finansal karar destek platformudur. 
 
-## Özellikler 🚀
+Google Gemini AI'ın gelişmiş akıl yürütme yetenekleri ile donatılan bu simülatör; sadece statik kurallar uygulamakla kalmaz, Türkiye ve dünya ekonomisinden anlık olarak beslenen resmi makroekonomik verileri sentezleyerek kullanıcıya özel dinamik risk raporları, 12 aylık birikim projeksiyonları ve aksiyon planları üretir.
 
-- **Yapay Zeka Destekli Senaryo Analizi:** Google Gemini AI ile kullanıcı girdilerine özel dinamik finansal analiz.
-- **Detaylı Finansal Modüller:** Konut kredisi, araç finansmanı ve genel finansal durum senaryolarını destekleyen esnek yapı.
-- **Görselleştirilmiş Veriler:** Nakit akışı projeksiyonları ve metrikler için Recharts ile oluşturulmuş interaktif grafikler.
-- **Modern ve Duyarlı Arayüz:** Tailwind CSS ile tasarlanmış, tüm cihazlara uyumlu, kullanıcı dostu deneyim.
-- **Güvenilir Altyapı:** Drizzle ORM ve PostgreSQL altyapısı ile sağlam veri katmanı.
+---
 
-## Kullanılan Teknolojiler 💻
+## 🌟 Öne Çıkan Gelişmiş Özellikler
 
-- **Frontend:** Next.js (App Router), React, Tailwind CSS, Recharts, Lucide React
-- **Backend & Veritabanı:** Next.js API Routes, Drizzle ORM, PostgreSQL
-- **Yapay Zeka:** Google Generative AI (Gemini)
-- **Dil:** TypeScript
+### 1. Çoklu-Ajan (Multi-Agent) Yapay Zeka Orkestrasyonu 🧠
+Uygulama, tek bir yapay zeka modeline sorup cevap almak yerine, her biri kendi alanında uzmanlaşmış **4 farklı AI Ajanı** paralel olarak çalıştırır ve ortak bir karara varır:
+*   **Makroekonomik Ajan (Macro Agent):** Güncel enflasyon, TCMB politika faizleri ve kur risklerinin kullanıcının birikim ve borç yapısına etkisini analiz eder.
+*   **Kredi ve Borç Risk Ajanı (Credit Agent):** Borç-Gelir Oranı (DTI), acil durum fonu yeterliliği (3-6 aylık standart) ve finansal sürdülebilirlik süresini değerlendirir.
+*   **Sektörel Risk Ajanı (Sector Agent):** Mevcut piyasa koşullarında gayrimenkul, döviz, emtia ve iş gücü gibi sektörlerin kullanıcı profiline getirdiği risk ve fırsatları listeler.
+*   **Stratejist Baş Ajan (Supervisor Agent):** Diğer 3 uzmanın raporlarını sentezleyerek **Finansal Sağlık Skoru (0-100)** üretir, **12 aylık birikim projeksiyonu** çıkarır ve aciliyet seviyelerine göre sıralanmış **Öncelikli Eylem Planı** hazırlar.
 
-## Canlı Demo 🌐
+### 2. Canlı RAG (Retrieval-Augmented Generation) Bilgi Hattı 📡
+Kullanıcılardan hiçbir dosya yüklemesi talep edilmeden, sistem arka planda resmi ekonomik kaynaklardan canlı veri çeken akıllı bir RAG entegrasyonuna sahiptir:
+*   **TCMB (Türkiye Cumhuriyet Merkez Bankası):** Günlük XML kur bülteni üzerinden canlı döviz kurları (USD, EUR, GBP, JPY).
+*   **Dünya Bankası (World Bank API):** Türkiye için son 3 yıllık TÜFE enflasyonu ve son 2 yıllık GSYİH büyüme göstergeleri.
+*   **St. Louis Fed (FRED):** Federal Rezerv sisteminden anlık ve geçmiş USD/TRY kur trendleri.
+*   **OECD Veritabanı:** Türkiye çeyreklik büyüme performansları ve para politikası bağlamı.
+*   *Optimizasyon:* API kotalarını aşmamak ve milisaniyeler seviyesinde hızlı çalışmak için tüm veriler **1 saatlik in-memory önbellekleme (caching)** sistemi ile yönetilir.
 
-Uygulamayı yerel ortamınıza kurmanıza gerek kalmadan doğrudan tarayıcınız üzerinden deneyimleyebilirsiniz:
-👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-1qyc7agp2-emir-hackathon.vercel.app)**
+### 3. Gemini Model Cascade (Akıllı Hata Toleransı) 🛡️
+Yapay zeka çağrılarının kotaya takılmasına (`Rate Limit 429` veya `RESOURCE_EXHAUSTED`) veya model erişim hatalarına karşı **Model Cascade** mimarisi uygulanmıştır. Hata durumunda sistem, kullanıcıya hiçbir kesinti yansıtmadan hiyerarşik olarak bir alt modeli otomatik devreye sokar:
+1.  `gemini-3.1-flash-lite` (En yeni, ultra hızlı ve hafif model)
+2.  `gemini-2.5-flash`
+3.  `gemini-2.0-flash`
+4.  `gemini-flash-latest`
+5.  `gemini-flash-lite-latest`
+6.  `gemini-3-flash-preview`
 
-## Geliştiriciler İçin Kurulum ve Çalıştırma 🛠️
+### 4. Profesyonel PDF Raporu İhracı 📄
+Kullanıcının finansal sağlığını özetleyen, tamamen tarayıcı tarafında (`jspdf` ve `html-to-image` ile) dinamik olarak oluşturulan profesyonel, çok sayfalı A4 PDF Raporu:
+*   **Finansal Profil:** Gelir, gider, birikim, borç, DTI ve acil durum fonu metrikleri.
+*   **Finansal Sağlık Skor Kartı:** Dinamik renk kodlu göstergeler.
+*   **Öncelikli Eylem Planları:** `Acil`, `Önemli` ve `Uzun Vadeli` etiketleri ile kategorize edilmiş matris.
+*   **Ajan Analiz Detayları:** Makro, Kredi ve Sektör ajanlarının detaylı paragrafları.
+*   **Sektörel Risk Matrisi:** Şiddet derecelerine (yüksek, orta, düşük) göre yapılandırılmış tablo.
 
-Projeyi geliştirmek veya yerel ortamınızda çalıştırmak isterseniz aşağıdaki adımları izleyebilirsiniz:
+### 5. Premium UI/UX ve Mikro Animasyonlar 🎨
+*   **Etkileşimli Borsa Arka Planı (StockBackground):** Canlı borsa hareketlerini simüle eden, basit hareketli grafiklerden öte, gerçek zamanlı Candle (Mum) grafiği çizimi, 7 günlük Basit Hareketli Ortalama (SMA) eğrisi, dinamik Destek & Direnç seviyeleri, anlık fiyat puls ringleri ve ışımaları içeren HTML5 Canvas animasyonu.
+*   **Oransal Harcama Slider'ı:** Kullanıcı toplam harcama miktarını değiştirdiğinde, bütçe alt kategorilerini (kira, fatura, gıda vb.) oransal olarak koruyarak otomatik güncelleyen akıllı form.
+*   **Modern Animasyonlar:** Karanlık/Aydınlık tema geçişleri için `AnimatedThemeToggler`, göz alıcı başlık geçişleri için `DiaTextReveal` ve Framer Motion geçişleri.
+
+---
+
+## 💻 Kullanılan Teknolojiler
+
+*   **Frontend:** Next.js (App Router, React 19), Tailwind CSS, Framer Motion, Recharts, Lucide React
+*   **Tasarım & Animasyon:** Radix UI, `@wrksz/themes` (Tema yönetimi), Magic UI (`DiaTextReveal`)
+*   **Yapay Zeka & RAG:** `@google/generative-ai` (Gemini SDK), TCMB & World Bank API Entegrasyonları
+*   **Veri Katmanı:** Drizzle ORM, PostgreSQL (pg)
+*   **Raporlama:** jsPDF, html2canvas, html-to-image
+
+---
+
+## 🛠️ Kurulum ve Çalıştırma
 
 ### Ön Koşullar
-
-- Node.js (v18 veya üzeri önerilir)
-- PostgreSQL veritabanı
-- Google Gemini API Anahtarı
+*   Node.js (v18 veya üzeri)
+*   PostgreSQL veritabanı
+*   Google Gemini API Anahtarı
 
 ### Adımlar
 
-1. **Gerekli Bağımlılıkları Yükleyin:**
-   Kök dizinde terminali açıp aşağıdaki komutu çalıştırın:
-   ```bash
-   npm install
-   ```
+1.  **Bağımlılıkları Yükleyin:**
+    ```bash
+    npm install
+    ```
 
-2. **Çevre Değişkenlerini Ayarlayın:**
-   Proje kök dizininde bulunan `.env.local` dosyasına gerekli API anahtarlarını ve veritabanı bağlantı bilgilerini ekleyin (Aşağıdaki Çevre Değişkenleri bölümüne bakın).
+2.  **Çevre Değişkenlerini Tanımlayın (`.env.local`):**
+    ```env
+    # Google Gemini API Anahtarı
+    GEMINI_API_KEY=sizin_gemini_api_anahtariniz
 
-3. **Geliştirme Sunucusunu Başlatın:**
-   ```bash
-   npm run dev
-   ```
+    # PostgreSQL Bağlantı Adresi
+    DATABASE_URL=postgresql://kullanici:sifre@host:port/veritabani_adi
+    ```
 
-4. **Uygulamayı Görüntüleyin:**
-   Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresine giderek uygulamaya erişebilirsiniz.
+3.  **Geliştirme Sunucusunu Başlatın:**
+    ```bash
+    npm run dev
+    ```
 
-## Çevre Değişkenleri 🔐
+4.  **Uygulamaya Bağlanın:**
+    [http://localhost:3000](http://localhost:3000)
 
-Uygulamanın çalışması için `.env.local` dosyasında en azından aşağıdaki değişkenlerin bulunması gerekmektedir:
+---
 
-```env
-# Google Gemini API Anahtarı (Yapay zeka simülasyonları için)
-GEMINI_API_KEY=sizin_gemini_api_anahtariniz
-
-# Veritabanı Bağlantı URL'si (PostgreSQL için)
-DATABASE_URL=postgresql://kullanici:sifre@host:port/veritabani_adi
-```
-
-## Geliştirici Komutları ⌨️
-
-- `npm run dev`: Geliştirme ortamını başlatır.
-- `npm run build`: Projeyi prodüksiyona hazır hale getirip derler.
-- `npm run start`: Derlenmiş projeyi başlatır.
-- `npm run lint`: Projedeki kod standardı hatalarını tarar.
+## 🌐 Canlı Demo
+Kurulum yapmadan tarayıcınızda denemek için:
+👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-iq79s69q9-emir-hackathon.vercelapp)**
