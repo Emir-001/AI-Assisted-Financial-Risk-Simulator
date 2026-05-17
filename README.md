@@ -21,7 +21,7 @@ Yapay Zeka Destekli Finansal Risk Simülatörü, kullanıcıların kredi (konut,
 ## Canlı Demo 🌐
 
 Uygulamayı yerel ortamınıza kurmanıza gerek kalmadan doğrudan tarayıcınız üzerinden deneyimleyebilirsiniz:
-👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-iq79s69q9-emir-hackathon.vercel.app)**
+👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-1qyc7agp2-emir-hackathon.vercel.app)**
 
 ## Geliştiriciler İçin Kurulum ve Çalıştırma 🛠️
 
