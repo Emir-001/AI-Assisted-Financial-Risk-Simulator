@@ -409,25 +409,19 @@ export default function Dashboard() {
         style: { background: bgColor, width: element.scrollWidth + 'px' }
       });
       
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = pdf.getImageProperties(imgData);
+      const dummyPdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = dummyPdf.internal.pageSize.getWidth();
+      const imgProps = dummyPdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      let heightLeft = pdfHeight;
-      let position = 0;
+      // Tek, tam boyutta bir sayfa oluşturarak alttaki beyaz boşluğu yok ediyoruz
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight]
+      });
 
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`Finansal_Risk_Raporu_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e) {
       console.error("PDF oluşturma hatası:", e);
@@ -454,25 +448,19 @@ export default function Dashboard() {
         backgroundColor: bgColor,
         style: { background: bgColor }
       });
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = pdf.getImageProperties(imgData);
+      const dummyPdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = dummyPdf.internal.pageSize.getWidth();
+      const imgProps = dummyPdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      let heightLeft = pdfHeight;
-      let position = 0;
+      // Tek, kesintisiz PDF sayfası oluştur
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight]
+      });
 
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save("Finansal_Analiz.pdf");
     } catch (e) {
       console.error("PDF oluşturma hatası:", e);
