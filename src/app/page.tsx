@@ -660,6 +660,9 @@ export default function Dashboard() {
               <Button variant="ghost" size="sm" className="gap-2 justify-start text-xs text-slate-400" onClick={exportPDF}>
                 <Download className="w-3 h-3" /> PDF Rapor
               </Button>
+              <Button variant="ghost" size="sm" className="gap-2 justify-start text-xs text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30" onClick={() => window.location.reload()}>
+                <RefreshCcw className="w-3 h-3" /> Tümünü Sıfırla
+              </Button>
             </div>
           </div>
         </header>
