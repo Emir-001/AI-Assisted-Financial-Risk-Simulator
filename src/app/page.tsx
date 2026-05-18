@@ -485,13 +485,37 @@ export default function Dashboard() {
     }, 1500);
   };
 
-  const chartData = useMemo(() => futureProjection.data.map((item) => ({
-    name: `${item.month}. Ay`,
-    bakiye: item.savings,
-    borc: item.debt,
-    net: item.netWorth,
-    senaryo: simulationResult?.projection?.[item.month - 1] ?? null
-  })), [futureProjection, simulationResult]);
+  const chartData = useMemo(() => {
+    if (!futureProjection.data?.length) return [];
+
+    // Get the actual baseline starting net worth
+    const actualStart = futureProjection.data[0].netWorth;
+
+    // Get the simulated starting net worth if available
+    const simulatedStart = simulationResult?.projection?.[0];
+
+    // Calculate alignment offset if there is a simulated projection
+    const offset = (simulatedStart !== undefined && simulatedStart !== null)
+      ? actualStart - simulatedStart
+      : 0;
+
+    return futureProjection.data.map((item, idx) => {
+      let senaryoVal = null;
+      if (simulationResult?.projection && idx < simulationResult.projection.length) {
+        const val = simulationResult.projection[idx];
+        if (val !== null && val !== undefined) {
+          senaryoVal = Math.round(val + offset);
+        }
+      }
+      return {
+        name: `${item.month}. Ay`,
+        bakiye: item.savings,
+        borc: item.debt,
+        net: item.netWorth,
+        senaryo: senaryoVal
+      };
+    });
+  }, [futureProjection, simulationResult]);
 
   const storyEvents = useMemo(() => {
     // 1. Matematik motorumuzdan gelen gerçek simülasyon olaylarını al ve 'desc' formatına eşle
@@ -630,7 +654,7 @@ export default function Dashboard() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-70 transition duration-300 group-hover:duration-200"></div>
                 <span className="relative flex items-center gap-2">
                   <PlayCircle className="w-5 h-5" />
-                  Canlı AI Simülasyonunu Başlat
+                  AI Stres Testi ve Risk Analizini Başlat (Demo Modu)
                 </span>
               </Button>
               <Button variant="outline" className="w-full sm:w-auto rounded-full px-8 py-6 text-lg gap-2" onClick={runSimulation} disabled={loading}>
@@ -751,7 +775,7 @@ export default function Dashboard() {
                   <BarChart2 className="w-8 h-8 text-slate-400" />
                 </div>
                 <p className="text-slate-700 dark:text-slate-300 font-medium text-lg mb-2">Simülasyon Bekleniyor</p>
-                <p className="text-sm text-slate-500 max-w-sm mb-4">"Canlı Demoyu Başlat" butonuna tıklayarak 4 AI ajanın paralel analizini başlatın.</p>
+                <p className="text-sm text-slate-500 max-w-sm mb-4">"AI Stres Testi ve Risk Analizini Başlat veya Kendi Verinle Test Et" butonlarına tıklayarak 4 AI ajanın paralel analizini başlatın.</p>
                 <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-400">
                   <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">🌍 Makro Ajan</span>
                   <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">💳 Kredi Ajanı</span>

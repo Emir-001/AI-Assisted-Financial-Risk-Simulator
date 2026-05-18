@@ -8,9 +8,13 @@ export async function POST(req: Request) {
     const { data, metrics } = await req.json();
 
     if (!process.env.GEMINI_API_KEY) {
-      const projection = Array.from({ length: 12 }, (_, i) =>
-        Math.max(0, data.totalSavings + (data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment) * (i + 1))
-      );
+      const projection = Array.from({ length: 12 }, (_, i) => {
+        const month = i + 1;
+        const netCashFlow = data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment;
+        const projectedSavings = data.totalSavings + netCashFlow * month;
+        const projectedDebt = Math.max(0, data.totalDebt - data.monthlyDebtPayment * month);
+        return Math.round(projectedSavings - projectedDebt);
+      });
       return NextResponse.json({
         macro: {
           analysis: "API anahtarı tanımlanmadığı için makro analiz yapılamadı.",

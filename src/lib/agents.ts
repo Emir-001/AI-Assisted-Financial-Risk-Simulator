@@ -304,7 +304,7 @@ Görevin:
 3. Öncelikli 3 eylem adımı belirle (her biri için: eylem, aciliyet, beklenen etki)
 4. 1 paragraf yönetici özeti
 5. 3 adet somut öneri
-6. 12 aylık birikim projeksiyonu (sayı dizisi)
+6. 12 aylık NET DEĞER (Birikimler - Kalan Borç) projeksiyonu (sayı dizisi: Borç yüksek olduğu için ilk aylarda eksi değerler almalıdır, örn: -100000, -80000...)
 
 Yanıtı YALNIZCA bu JSON formatında ver:
 {
@@ -315,13 +315,17 @@ Yanıtı YALNIZCA bu JSON formatında ver:
   ],
   "summary": "Türkçe yönetici özeti paragrafı...",
   "recommendations": ["öneri1", "öneri2", "öneri3"],
-  "projection": [<12 sayı: aylık beklenen birikim miktarları>]
+  "projection": [<12 sayı: aylık beklenen net değerler (Birikim - Kalan Borç). Borç yüksekse eksi sayılar yazmalısın.>]
 }`;
 
   const text = await generateWithFallback(prompt);
-  const fallbackProjection = Array.from({ length: 12 }, (_, i) =>
-    Math.max(0, data.totalSavings + (data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment) * (i + 1))
-  );
+  const fallbackProjection = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const netCashFlow = data.monthlyIncome - data.monthlyExpenses - data.monthlyDebtPayment;
+    const projectedSavings = data.totalSavings + netCashFlow * month;
+    const projectedDebt = Math.max(0, data.totalDebt - data.monthlyDebtPayment * month);
+    return Math.round(projectedSavings - projectedDebt);
+  });
 
   return safeJson<SupervisorResult>(text, {
     overallScore: 50,
@@ -405,22 +409,29 @@ Bu senaryonun etkisini simüle et. İkincil etkileri de hesaba kat.
 JSON formatında yanıt ver:
 {
   "analysis": "Türkçe analiz",
-  "projection": [6 aylık birikim miktarı dizisi],
+  "projection": [12 aylık NET DEĞER (Birikim - Kalan Borç) miktarı dizisi. Borç yüksekse ilk aylarda eksi değerler almalıdır, örn: -100000, -80000...],
   "risks": ["risk1", "risk2"],
   "mitigation": ["önlem1", "önlem2"]
 }`;
+  const defaultProjection = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const netCashFlow = baseData.monthlyIncome - baseData.monthlyExpenses - baseData.monthlyDebtPayment;
+    const projectedSavings = baseData.totalSavings + netCashFlow * month;
+    const projectedDebt = Math.max(0, baseData.totalDebt - baseData.monthlyDebtPayment * month);
+    return Math.round(projectedSavings - projectedDebt);
+  });
   try {
     const text = await generateWithFallback(prompt);
     return safeJson<any>(text, {
       analysis: "Senaryo analizi tamamlanamadı.",
-      projection: Array.from({ length: 6 }, (_, i) => baseData.totalSavings - i * 5000),
+      projection: defaultProjection,
       risks: [],
       mitigation: [],
     });
   } catch {
     return {
       analysis: "API Hatası: Simülasyon yapılamadı.",
-      projection: Array.from({ length: 6 }, (_, i) => baseData.totalSavings - i * 5000),
+      projection: defaultProjection,
       risks: ["API Bağlantı Hatası"],
       mitigation: ["Geçerli bir Gemini API anahtarı ekleyin."],
     };

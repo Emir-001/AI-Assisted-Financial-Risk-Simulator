@@ -64,10 +64,14 @@ export function calculateMetrics(data: FinancialData): FinancialMetrics {
     riskReasons.push("Düşük acil durum nakit rezervi");
     riskBreakdown.push({ name: "Yetersiz Acil Fon", impact: 24 });
   } else {
-    const efScore = Math.max(0, (6 - emergencyFundMonths) * 10);
-    stressScore += efScore;
-    if (efScore > 0) riskBreakdown.push({ name: "Sınırlı Nakit Tamponu", impact: Math.round(efScore * 0.6) });
-    else riskBreakdown.push({ name: "Güçlü Acil Fonu", impact: -15 }); // Reward
+    const efScore = (6 - emergencyFundMonths) * 10;
+    const cappedEfScore = Math.max(-25, Math.min(30, efScore));
+    stressScore += cappedEfScore;
+    if (cappedEfScore > 0) {
+      riskBreakdown.push({ name: "Sınırlı Nakit Tamponu", impact: Math.round(cappedEfScore * 0.6) });
+    } else if (cappedEfScore < 0) {
+      riskBreakdown.push({ name: "Güçlü Acil Fonu", impact: Math.round(cappedEfScore * 0.6) });
+    }
   }
 
   const debtToSavings = totalSavings > 0 ? totalDebt / totalSavings : totalDebt > 0 ? 10 : 0;
