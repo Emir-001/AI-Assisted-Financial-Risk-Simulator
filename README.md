@@ -95,4 +95,4 @@ Kullanıcının finansal sağlığını özetleyen, tamamen tarayıcı tarafınd
 
 ## 🌐 Canlı Demo
 Kurulum yapmadan tarayıcınızda denemek için:
-👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-31c2lk7sv-emir-hackathon.vercel.app)**
+👉 **[Yapay Zeka Destekli Finansal Risk Simülatörü - Canlı Demo](https://ai-assisted-financial-risk-simulator-atl9ldvuh-emir-hackathon.vercel.app)**
